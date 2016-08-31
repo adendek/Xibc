@@ -3,6 +3,17 @@ from Gaudi.Configuration import *
 from PhysSelPython.Wrappers import AutomaticData, DataOnDemand, Selection, SelectionSequence
 from Configurables import  CombineParticles, FilterDesktop,  OfflineVertexFitter
 from Configurables import DaVinci
+from Configurables import SubstitutePID
+
+from Configurables import MCDecayTreeTuple
+from Configurables import MCTupleToolReconstructed, MCReconstructed
+
+####################### run setting 
+simulation = True
+year = str(2012)
+polarity = -1 
+
+
 
 
 #--Scaler----------------------------------------------------------------
@@ -10,64 +21,41 @@ from Configurables import TrackScaleState
 scaler = TrackScaleState( 'StateScale' )
 #------------------------------------------------------------------------
 
-
 kaons        = DataOnDemand(Location = "Phys/StdAllNoPIDsKaons/Particles")
 protons      = DataOnDemand(Location = "Phys/StdAllNoPIDsProtons/Particles")
 longpions    = DataOnDemand(Location = "Phys/StdAllNoPIDsPions/Particles")
 
-
-
 #-------------------------------------------------------------------------------------------------
-locationLb   = "/Event/BhadronCompleteEvent/Phys/Phys/Lb2LcKLc2PKPiBeauty2CharmLine/Particles"
+locationB   = "/Event/BhadronCompleteEvent/Phys/Lb2LcKLc2PKPiBeauty2CharmLine/Particles"
 if simulation:
-    locationLb = "/Event/AllStreams/Phys/Lb2LcKLc2PKPiBeauty2CharmLine/Particles"
-Lb2LcK      = AutomaticData(Location = locationLb)
+    locationB = "/Event/AllStreams/Phys/Lb2LcKLc2PKPiBeauty2CharmLine/Particles"
+Xb2LcK      = AutomaticData(Location = locationB)
 
-_MyXb2XcK = FilterDesktop('_MyXb2XcK')
-_MyXb2XcK.Code = "(MAXTREE('p+'==ABSID,PROBNNp)>0.1)&(MAXTREE('K+'==ABSID,PROBNNk)>0.05)&(MAXTREE('Lambda_b0'==ABSID,M)>5350*MeV)&(MAXTREE('Lambda_b0'==ABSID,M)<6000*MeV)&(MAXTREE('Lambda_c+'==ABSID, M)>2260*MeV)&(MAXTREE('Lambda_c+'==ABSID, M)<2315*MeV)"
-MyLb2Lcpi = Selection("MyLb2Lcpi", Algorithm = _MyXb2XcK, RequiredSelections = [Lb2LcK] )
-#-------------------------------------------------------------------------------------------------
+myPreAmble = [ "Z  = VFASPF(VZ)"   ,
+               "DZ1 = CHILD(Z,1)-Z",
+               "DZ2 = CHILD(Z,2)-Z",
+               "VCHISQDOF = VFASPF(VCHI2/VDOF)",
+               "MIPCHI2 = MIPCHI2DV(PRIMARY)",
+               "MIP = MIPDV(PRIMARY)",
+               "NKaon = NINGENERATION(ABSID=='K-', 1)",
+               "NKaonFailPID = NINTREE( ((ABSID=='K+') & (PIDK<0) ) )",
+               "NKaonFail = CHILD(NKaonFailPID, 2)",
+               "NPion = NINGENERATION(ABSID=='pi-', 1)",
+               "NPionFromD0 = NINGENERATION(ABSID=='pi-', 2)",
+               "NPim = NINGENERATION(ID=='pi-', 1)",
+               "NPip = NINGENERATION(ID=='pi+', 1)",
+               ]
 
+# filter  [ Lambda_b0 -> (Lambda_c+ -> p+ ^K- pi+) K- ]CC",
+selCode = "(MINTREE('K-'==ABSID,PROBNNk)>0.05)&(MINTREE('Lambda_b0'==ABSID, M)>2245*MeV)&(MAXTREE('Lambda_b0'==ABSID, M)<2325*MeV)"
+_MyX2LcKFilt = FilterDesktop('_MyX2D0piFilt', Preambulo=myPreAmble, Code=selCode )
+MyX2LcK = Selection("MyX2LcK", Algorithm = _MyX2LcKFilt, RequiredSelections = [Xb2LcK] )
 
-#BPVVDCHI2: chi2 separation from related PV
-#BPVIPCHI2(): Computes the chi2-IP on the related PV
-
-
-#----Selection Xibb -> /\b pi+/-----------------------------------------------------------------
-_Sigb2Lbpi = CombineParticles( "_Sigb2Lbpi",
-                              DecayDescriptors = ["[Xi_bc+ -> Lambda_b0 pi+]cc"],
-                              CombinationCut   = "(AM-AM1-AM2>450*MeV) & (APT>2*GeV)",
-                              DaughtersCuts    = { "pi+"      : "(PT > 200*MeV) & (P > 2000*MeV) & (TRCHI2DOF < 4.0) & (MIPCHI2DV(PRIMARY)>4)"},
-                              MotherCut        = "(M-M1-M2>500*MeV) & (PT>1*GeV) & (VFASPF(VCHI2/VDOF)<10) & (MIPCHI2DV(PRIMARY)<16)",
-                              ReFitPVs         = True )
-Sigb2Lbpi  = Selection( "Sigb2Lbpi ",
-                      Algorithm          = _Sigb2Lbpi ,
-                      RequiredSelections = [ MyLb2Lcpi,  longpions] )
-
-_wsSigb2Lbpi = CombineParticles( "_wsSigb2Lbpi",
-                              DecayDescriptors = ["[Xi_bc+ -> Lambda_b~0 pi+]cc"],
-                              CombinationCut   = "(AM-AM1-AM2>450*MeV) & (APT>2*GeV)",
-                              DaughtersCuts    = { "pi+"      : "(PT > 200*MeV) & (P > 2000*MeV) & (TRCHI2DOF < 4.0) & (MIPCHI2DV(PRIMARY)>4)"},
-                              MotherCut        = "(M-M1-M2>500*MeV) & (PT>1*GeV) & (VFASPF(VCHI2/VDOF)<10) & (MIPCHI2DV(PRIMARY)<16)",
-                              ReFitPVs         = True )
-wsSigb2Lbpi  = Selection( "wsSigb2Lbpi ",
-                      Algorithm          = _wsSigb2Lbpi ,
-                      RequiredSelections = [ MyLb2Lcpi,  longpions] )
-
-
-#-------------------------------------------------------------------------------------------------
-
-
-### Gaudi sequences ----------------------------------------------
-SeqLb2Lcpi = SelectionSequence("SeqLb2Lcpi", TopSelection = MyLb2Lcpi)
-seqLb = SeqLb2Lcpi.sequence()
-SeqSigb2Lbpi = SelectionSequence("SeqSigb2Lbpi", TopSelection = Sigb2Lbpi)
-seqXib = SeqSigb2Lbpi.sequence()
-wsSeqSigb2Lbpi = SelectionSequence("wsSeqSigb2Lbpi", TopSelection = wsSigb2Lbpi)
-wsseqXib = wsSeqSigb2Lbpi.sequence()
-#---------------------------------------------------------------
-
-
+# ---------------------------------
+# Now, the final selection sequence
+# ----------------------------------
+SelSeqMyX2LcK = SelectionSequence('SelSeq'+'MyX2LcK', TopSelection = MyX2LcK)
+seqMyX2LcK = SelSeqMyX2LcK.sequence()
 
 ###########################################################################
 # Configure DaVinci
@@ -78,7 +66,7 @@ from Configurables import  DecayTreeTuple, MCDecayTreeTuple
 importOptions("DecayTreeTuple_Xibc.py")
 
 from PhysConf.Filters import LoKi_Filters
-fltrs = LoKi_Filters (STRIP_Code = " HLT_PASS_RE('StrippingLb2LcPiNoIPLc2PKPiBeauty2CharmLineDecision') ")
+fltrs = LoKi_Filters (STRIP_Code = " HLT_PASS_RE('Lb2LcKLc2PKPiBeauty2CharmLine') ")
 fltrSeq = fltrs.sequence ( 'MyFilters' )
 
 from Configurables import LoKi__HDRFilter   as StripFilter
@@ -86,23 +74,40 @@ if simulation == False:
     DaVinci().EventPreFilters = [fltrSeq]
 
 
-tuple0  = DecayTreeTuple( "xibc" )
-tuple0.Inputs = [ SeqSigb2Lbpi.outputLocation() ]
-tuple1  = DecayTreeTuple( "wsxibc")
-tuple1.Inputs = [ wsSeqSigb2Lbpi.outputLocation() ]
-tupleLb = DecayTreeTuple( "lambdab" )
-tupleLb.Inputs = [ SeqLb2Lcpi.outputLocation() ]
-
+tuple0  = DecayTreeTuple( "lambdab" )
+tuple0.Inputs = [ MyX2LcK.outputLocation() ]
 
 if simulation:
     tuple0.ToolList += [ "TupleToolMCTruth" ]
-    tuple1.ToolList += [ "TupleToolMCTruth" ]
-    tupleLb.ToolList += [ "TupleToolMCTruth" ]
+
+    # MC Truth information - filled for ALL events
+    decay = "[Lambda_b0 -> ^(Lambda_c+ -> ^p+ ^K- ^pi+) ^K-]CC"
+    mcTuple = MCDecayTreeTuple("MCTupleXb2D0p")
+    mcTuple.Decay = decay
+    mcTuple.ToolList = [ "MCTupleToolKinematic", "MCTupleToolReconstructed" ]
+    mcTuple.UseLabXSyntax = True
+    mcTuple.RevertToPositiveID = False
+
+# ---------------
+# Gaudi sequences
+# ---------------
+#MyX2D0pGauSeq = GaudiSequencer("MyX2D0pGauSeq")
+#MyX2D0pGauSeq.Members += [scaler ]
+#MyX2D0pGauSeq.Members += [seqMyX2D0p ]
+#MyX2D0pGauSeq.Members += [ tuple0 ]
+
+#MywsX2D0pGauSeq = GaudiSequencer("MywsX2D0pGauSeq")
+#MywsX2D0pGauSeq.Members += [scaler ]
+#MywsX2D0pGauSeq.Members += [seqMyX2D0p ]
+#MywsX2D0pGauSeq.Members += [ tuple1 ]
 
 
 
-#DaVinci().appendToMainSequence( [scaler] )
-DaVinci().UserAlgorithms = [ scaler, seqLb, seqXib, wsseqXib, tuple0, tuple1, tupleLb]
+#---------------------------------------------------------------
+
+DaVinci().UserAlgorithms = [ scaler, seqMyX2LcK, tuple0 ]
+if simulation:
+    DaVinci().appendToMainSequence( [mcTuple] )
 
 #
 DaVinci().EvtMax     = -1
@@ -121,9 +126,6 @@ else:
     CondDB( LatestGlobalTagByDataType = year )
     DaVinci().Lumi       = True
     DaVinci().InputType = 'DST'
-
-#
-
 
 
 
