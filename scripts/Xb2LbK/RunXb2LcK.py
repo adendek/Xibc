@@ -11,9 +11,7 @@ from Configurables import MCTupleToolReconstructed, MCReconstructed
 ####################### run setting 
 simulation = True
 year = str(2012)
-polarity = -1 
-
-
+polarity = -1
 
 
 #--Scaler----------------------------------------------------------------
@@ -48,14 +46,27 @@ myPreAmble = [ "Z  = VFASPF(VZ)"   ,
 
 # filter  [ Lambda_b0 -> (Lambda_c+ -> p+ ^K- pi+) K- ]CC",
 selCode = "(MINTREE('K-'==ABSID,PROBNNk)>0.05)&(MINTREE('Lambda_b0'==ABSID, M)>2245*MeV)&(MAXTREE('Lambda_b0'==ABSID, M)<2325*MeV)"
-_MyX2LcKFilt = FilterDesktop('_MyX2D0piFilt', Preambulo=myPreAmble, Code=selCode )
+_MyX2LcKFilt = FilterDesktop('_MyX2LcKFilt', Preambulo=myPreAmble, Code=selCode )
 MyX2LcK = Selection("MyX2LcK", Algorithm = _MyX2LcKFilt, RequiredSelections = [Xb2LcK] )
+
+
+# similar for wrong sign
+locationBws   = "/Event/BhadronCompleteEvent/Phys/Lb2LcKWSLc2PKPiBeauty2CharmLine/Particles"
+if simulation:
+    locationBws = "/Event/AllStreams/Phys/Lb2LcKWSLc2PKPiBeauty2CharmLine/Particles"
+Xb2LcK_ws      = AutomaticData(Location = locationBws)
+_MyX2LcK_wsFilt = FilterDesktop('_MyX2LcK_wsFilt', Preambulo=myPreAmble, Code=selCode )
+MyX2LcK_ws = Selection("MyX2LcK_ws", Algorithm = _MyX2LcK_wsFilt, RequiredSelections = [Xb2LcK_ws] )
 
 # ---------------------------------
 # Now, the final selection sequence
 # ----------------------------------
 SelSeqMyX2LcK = SelectionSequence('SelSeq'+'MyX2LcK', TopSelection = MyX2LcK)
 seqMyX2LcK = SelSeqMyX2LcK.sequence()
+
+SelSeqMyX2LcK_ws = SelectionSequence('SelSeq'+'MyX2LcK_ws', TopSelection = MyX2LcK_ws)
+seqMyX2LcK_ws = SelSeqMyX2LcK_ws.sequence()
+
 
 ###########################################################################
 # Configure DaVinci
@@ -76,6 +87,8 @@ if simulation == False:
 
 tuple0  = DecayTreeTuple( "lambdab" )
 tuple0.Inputs = [ MyX2LcK.outputLocation() ]
+wstuple0  = DecayTreeTuple( "wsLambdab")
+wstuple0.Inputs = [ MyX2LcK.outputLocation() ]
 
 if simulation:
     tuple0.ToolList += [ "TupleToolMCTruth" ]
@@ -102,10 +115,9 @@ if simulation:
 #MywsX2D0pGauSeq.Members += [ tuple1 ]
 
 
-
 #---------------------------------------------------------------
 
-DaVinci().UserAlgorithms = [ scaler, seqMyX2LcK, tuple0 ]
+DaVinci().UserAlgorithms = [ scaler, seqMyX2LcK, tuple0, seqMyX2LcK_ws ,wstuple0 ]
 if simulation:
     DaVinci().appendToMainSequence( [mcTuple] )
 

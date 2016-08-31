@@ -91,6 +91,14 @@ tuple.MyLoKiTool.Preambulo = [
 tuple.ReFitPVs = True
 #######################################
 
-
-############### the similar stuff for wrong side study
-############## but right now I skipp this step. ss
+tuplews = tuple.clone("wsLambdab")
+tuple.Inputs = ["/Event/BhadronCompleteEvent/Phys/Lb2LcKWSLc2PKPiBeauty2CharmLine/Particles"]
+tuplews.Decay = '[Lambda_b0 -> ^(Lambda_c+ -> p+ K- pi+) ^K+]CC'
+tuplews.Branches = {
+    "Xb"   :  "[Lambda_b0 -> (Lambda_c+ -> p+ K- pi+) K+]CC",
+    "Xc"   :  "[ Lambda_b0 -> ^(Lambda_c+ -> p+ K- pi+) K+ ]CC",
+    "p"      :  "[ Lambda_b0 -> (Lambda_c+ -> ^p+ K- pi+) K+ ]CC",
+    "k"      :  "[ Lambda_b0 -> (Lambda_c+ -> p+ ^K- pi+) K+ ]CC",
+    "pi"     :  "[ Lambda_b0 -> (Lambda_c+ -> p+ K- ^pi+) K+ ]CC",
+    "XcK"   :  "[ Lambda_b0 -> (Lambda_c+ -> p+ K- pi+) ^K+ ]CC"
+    }
