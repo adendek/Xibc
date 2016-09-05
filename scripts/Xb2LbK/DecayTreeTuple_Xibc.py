@@ -15,7 +15,7 @@ from Configurables import LoKi__Hybrid__EvtTupleTool as LoKiTool
 #
 #######################################
 
-tuple = DecayTreeTuple('lambdab')
+tuple = DecayTreeTuple('MyXb0')
 tuple.Inputs = ["/Event/BhadronCompleteEvent/Phys/Lb2LcKLc2PKPiBeauty2CharmLine/Particles"]
 tuple.TupleName = "mytree"
 tuple.ToolList = [
@@ -27,6 +27,7 @@ tuple.ToolList = [
        "TupleToolTrackInfo",
        "TupleToolPropertime",
        ]
+
 tistos = TupleToolTISTOS("tistos")
 tistos.VerboseL0   = 1
 tistos.VerboseHlt1 = 1
@@ -46,13 +47,9 @@ tistos.TriggerList = [
     ]
 LoKi_lab0 = LoKi__Hybrid__TupleTool("LoKi_lab0")
 LoKi_lab0.Variables =  {
-    #"LOKI_ETA"             : "ETA",
-    #"LV01"                 : "LV01",
-    #"LV02"                 : "LV02",
-    #"LOKI_DIRA"            : "BPVDIRA" ,
+    "LOKI_DIRA"            : "BPVDIRA" ,
     "LOKI_DTF_CTAU"        : "DTF_CTAU( 0, True )",
     "LOKI_FDCHI2"          : "BPVVDCHI2",
-    #"LOKI_BPVIPCHI2"       : "BPVIPCHI2()",
     "LOKI_MASS_LcConstr"        : "DTF_FUN ( M ,                  True , 'Lambda_c+')",
     "LOKI_VCHI2NDOF_LcConstr"   : "DTF_FUN ( VFASPF(VCHI2/VDOF) , True , 'Lambda_c+')",
     "LOKI_CHI2NDOF_LcConstr"    : "DTF_CHI2NDOF( True,'Lambda_c+')"
@@ -91,7 +88,7 @@ tuple.MyLoKiTool.Preambulo = [
 tuple.ReFitPVs = True
 #######################################
 
-tuplews = tuple.clone("wsLambdab")
+tuplews = tuple.clone("MyXb0_ws")
 tuple.Inputs = ["/Event/BhadronCompleteEvent/Phys/Lb2LcKWSLc2PKPiBeauty2CharmLine/Particles"]
 tuplews.Decay = '[Lambda_b0 -> ^(Lambda_c+ -> p+ K- pi+) ^K+]CC'
 tuplews.Branches = {
