@@ -7,6 +7,7 @@ from Configurables import SubstitutePID
 
 from Configurables import MCDecayTreeTuple
 from Configurables import MCTupleToolReconstructed, MCReconstructed
+from Configurables import DecayTreeTuple
 
 ####################### run setting 
 simulation = True
@@ -66,11 +67,11 @@ seqMyX2LcK_ws = SelSeqMyX2LcK_ws.sequence()
 # from Configurables import DaVinci
 # from Configurables import  OfflineVertexFitter
 
-importOptions("MyXb0TupleTree.py")
+importOptions("DecayTreeTuple_Xibc.py")
 
 # right-sign
 tupleMyXb0 = DecayTreeTuple("MyXb0")
-tupleMyXb0.Inputs = [seqMyX2LcK.outputLocation()]
+tupleMyXb0.Inputs = [SelSeqMyX2LcK.outputLocation()]
 # wrong-sign
 tupleMyXb0_ws = DecayTreeTuple("MyXb0_ws")
 tupleMyXb0_ws.Inputs = [SelSeqMyX2LcK_ws.outputLocation()]
