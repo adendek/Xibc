@@ -11,9 +11,9 @@ from Configurables import DecayTreeTuple
 
 ####################### run setting 
 simulation = True
-year = str(2012)
+year = "2012"
 polarity = -1
-
+#################################
 
 TrackCut = "(TRCHI2DOF < 4.0) & (MIPCHI2DV(PRIMARY)>2) & (TRGHOSTPROB < 0.4) & (PT > 200*MeV) & (ISLONG)"
 DaughtCutPi = TrackCut + " &  (PROBNNpi>0.01)"
@@ -39,7 +39,8 @@ if simulation:
 Xb2LcK = AutomaticData(Location = locationXb2LcK)
 
 
-selCode = "(MINTREE('K-'==ABSID,PROBNNk)>0.05)&(MINTREE('Lambda_b0'==ABSID, M)>2245*MeV)&(MAXTREE('Lambda_b0'==ABSID, M)<2325*MeV)"
+selCode = "(MINTREE('K-'==ABSID,PROBNNk)>0.05)&(MINTREE('p+'==ABSID,PROBNNp)>0.05)&(MINTREE('Lambda_c+'==ABSID, M)>2245*MeV)&(MAXTREE('Lambda_c+'==ABSID, M)<2325*MeV)"
+#selCode ="(MINTREE('K-'==ABSID,PROBNNk)>0.05)&(MINTREE('p+'==ABSID,PROBNNp)>0.05)"
 _MyX2LcKFilt = FilterDesktop('_MyX2LcKFilt', Code=selCode )
 MyX2LcK = Selection("MyX2LcK", Algorithm = _MyX2LcKFilt, RequiredSelections = [Xb2LcK] )
 
@@ -55,10 +56,10 @@ MyX2LcK_ws = Selection("MyX2LcK_ws", Algorithm = _MyX2LcK_wsFilt, RequiredSelect
 # ---------------------------------
 # Now, the final selection sequence
 # ----------------------------------
-SelSeqMyX2LcK = SelectionSequence('SelSeq'+'MyX2LcK', TopSelection = MyX2LcK)
+SelSeqMyX2LcK = SelectionSequence('SelSeqMyX2LcK', TopSelection = MyX2LcK)
 seqMyX2LcK = SelSeqMyX2LcK.sequence()
 
-SelSeqMyX2LcK_ws = SelectionSequence('SelSeq'+'MyX2LcK_ws', TopSelection = MyX2LcK_ws)
+SelSeqMyX2LcK_ws = SelectionSequence('SelSeqMyX2LcK_ws', TopSelection = MyX2LcK_ws)
 seqMyX2LcK_ws = SelSeqMyX2LcK_ws.sequence()
 
 # --------------------------------------------------------------------------
@@ -100,7 +101,7 @@ if simulation:
     tupleMyXb0_ws.ToolList += ["TupleToolMCBackgroundInfo"]
 
     # MC Truth information - filled for ALL events
-    decay = "[ Lambda_b0 -> ^(Lambda_c+ -> ^p+ ^K- ^pi+) ^K- ]CC"
+    decay = "[ Lambda_b0 => ^(Lambda_c+ ==> ^p+ ^K- ^pi+) ^K- ]CC"
     mcTuple = MCDecayTreeTuple("MCTupleXb2LcK")
     mcTuple.Decay = decay
     mcTuple.ToolList = ["MCTupleToolKinematic", "MCTupleToolReconstructed"]
@@ -159,3 +160,11 @@ else:
     uDstConf(rootInTes)
     DaVinci().InputType = 'MDST'
     DaVinci().RootInTES = rootInTes
+
+
+
+from GaudiConf import IOHelper
+IOHelper().inputFiles(['/afs/cern.ch/work/s/sblusk//public/Xibc/LcK/00053261_00000028_2.AllStreams.dst'], clear=True)
+
+
+

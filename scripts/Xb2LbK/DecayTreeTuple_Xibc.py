@@ -25,7 +25,7 @@ tuple.ToolList = [
        "TupleToolEventInfo",
        "TupleToolPid",
        "TupleToolTrackInfo",
-       "TupleToolPropertime",
+       "TupleToolRecoStats",
        ]
 
 tistos = TupleToolTISTOS("tistos")
@@ -37,13 +37,7 @@ tistos.TriggerList = [
     'L0HCALDecision',
     'L0HadronDecision',
     'L0MuonDecision',
-    'L0MuonHighDecision',
-    'Hlt2Topo2BodyBBDTDecision',
-    'Hlt2Topo2BodySimpleDecision',
-    'Hlt2Topo3BodyBBDTDecision',
-    'Hlt2Topo3BodySimpleDecision',
-    'Hlt2Topo4BodyBBDTDecision',
-    'Hlt2Topo4BodySimpleDecision',
+    'L0MuonHighDecision'
     ]
 LoKi_lab0 = LoKi__Hybrid__TupleTool("LoKi_lab0")
 LoKi_lab0.Variables =  {
@@ -74,16 +68,7 @@ tuple.Xb.ToolList+=["TupleToolTISTOS/tistos"]
 #######################################
 tuple.Xb.addTool(LoKi_lab0)
 tuple.Xb.ToolList+=["LoKi::Hybrid::TupleTool/LoKi_lab0"]
-tuple.addTool(LoKiTool , 'MyLoKiTool' )
-tuple.ToolList += [ "LoKi::Hybrid::EvtTupleTool/MyLoKiTool" ]
-#######################################
-tuple.MyLoKiTool.VOID_Variables = { 'nTracks' :  " CONTAINS ('Rec/Track/Best') "  ,
-                                     "nLong"  :  " TrSOURCE('Rec/Track/Best', TrLONG) >> TrSIZE "
-                                          }
-tuple.MyLoKiTool.Preambulo = [
-    "from LoKiTracks.decorators import *",
-    "from LoKiCore.functions import *"
-    ]
+tuple.Xc.ToolList+= ["TupleToolPropertime"]
 #######################################
 tuple.ReFitPVs = True
 #######################################
