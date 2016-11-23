@@ -10,9 +10,9 @@ from Configurables import MCTupleToolReconstructed, MCReconstructed
 from Configurables import DecayTreeTuple
 
 ####################### run setting 
-simulation = True
-year = "2012"
-polarity = -1
+#simulation = True
+#year = "2012"
+#polarity = -1
 #################################
 
 TrackCut = "(TRCHI2DOF < 4.0) & (MIPCHI2DV(PRIMARY)>2) & (TRGHOSTPROB < 0.4) & (PT > 200*MeV) & (ISLONG)"
@@ -116,14 +116,16 @@ if simulation == False:
 gseqMyXb0.Members += [seqMyX2LcK]
 gseqMyXb0.Members += [tupleMyXb0]
 
-wsgseqMyXb0 = GaudiSequencer("MyGaudiSeqMyXb0_ws")
 if simulation == False:
+    wsgseqMyXb0 = GaudiSequencer("MyGaudiSeqMyXb0_ws")
     gseqMyXb0.Members += [fltrSeq_ws]
-wsgseqMyXb0.Members += [seqMyX2LcK_ws]
-wsgseqMyXb0.Members += [tupleMyXb0_ws]
+    wsgseqMyXb0.Members += [seqMyX2LcK_ws]
+    wsgseqMyXb0.Members += [tupleMyXb0_ws]
 
-# DaVinci().appendToMainSequence( [gseqMyXb0] )
-DaVinci().appendToMainSequence([gseqMyXb0, wsgseqMyXb0])
+DaVinci().appendToMainSequence( [gseqMyXb0] )
+#DaVinci().appendToMainSequence([gseqMyXb0, wsgseqMyXb0])
+if simulation == False:
+    DaVinci().appendToMainSequence([wsgseqMyXb0])                                                                                                                                                                                                                  
 if simulation:
     DaVinci().appendToMainSequence([mcTuple])
 
@@ -163,8 +165,8 @@ else:
 
 
 
-from GaudiConf import IOHelper
-IOHelper().inputFiles(['/afs/cern.ch/work/s/sblusk//public/Xibc/LcK/00053261_00000028_2.AllStreams.dst'], clear=True)
+#from GaudiConf import IOHelper
+#IOHelper().inputFiles(['/afs/cern.ch/work/s/sblusk//public/Xibc/LcK/00053261_00000028_2.AllStreams.dst'], clear=True)
 
 
 

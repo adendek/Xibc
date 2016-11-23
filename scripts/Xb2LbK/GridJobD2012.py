@@ -18,8 +18,8 @@ splitter = SplitByFiles(filesPerJob=filesPerJob, maxFiles = maxFiles)
 
 # Inputs that may change with datatype, year, etc
 year = "2012"
-pol = 1  # -1 is down, +1 = up
-simulation = True
+pol = -1  # -1 is down, +1 = up
+simulation = False
 
 
 if simulation:
@@ -70,7 +70,7 @@ def getDataSet(year,pol):
     stripVer2012 = "21"     #re-strip #3 stripping (2012)
     stripVer2011 = "21r1"     #re-strip #2 (2011)
 
-    stream = 'BHADRONCOMPLETEEVENT.DST'
+    stream = 'BHADRON.MDST'
 
     #--- 2012 data (reco 14)
     data2012MagDown = 'LHCb/Collision12/Beam4000GeV-VeloClosed-MagDown/Real Data/Reco14/Stripping'+stripVer2012+'/90000000/'+stream
