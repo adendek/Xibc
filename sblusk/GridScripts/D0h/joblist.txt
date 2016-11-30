@@ -1,0 +1,7 @@
+  D0p
+-------
+
+Signal MC: 1986(dn), 1987(up) both partial, 2007, 2010 (full data set), 2011, 2012
+Data: 1982, 1983, 1984, 1985
+
+

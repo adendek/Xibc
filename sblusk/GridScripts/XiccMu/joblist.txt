@@ -1,0 +1,32 @@
+Xibc -> Xicc mu nu
+====================
+
+Data, all modes: 2112 - 2115
+
+
+Signal MC
+==========
+
+DecID = "16675060"   # Xibc -> Xicc++ mu nu, Xicc++ _> Xic+ pi+
+      - 2081, 2082, 2083, 2084
+
+DecID = "16677060"   # Xibc -> Xicc++ mu nu, Xicc++ _> Lc+ K+ pi- pi+
+      - 2085, 2086
+
+DecID = "16676060"   # Xibc -> Xicc+ mu nu, Xic++ _> Xic0 pi+
+      - 2087, 2088 (nfg); 2093, 2094 
+
+DecID = "16676061"   # Xibc -> Xicc+ mu nu, Xicc++ _> Lc+ K- pi+
+      - 2089, 2090
+      
+DecID = "16576061"   # Xibc -> Xicc+ mu nu, Xicc++ _> D+ p K- 
+      - 2091, 2092 (nfg); 2095, 2096 (nfg), 2097, 2098
+
+
+Data
+=====
+
+2099 - 2011 magdn
+2100 - 2011 magup
+2101 - 2012 magdn
+2102 - 2012 magup
