@@ -99,7 +99,7 @@ void setFrameAtt(RooPlot *frame, TString xtit, TString ytit)
   frame->SetTitleSize(0.050,"X");
   frame->SetTitleSize(0.050,"Y");
   frame->SetTitleOffset(0.95,"X");
-  frame->SetTitleOffset(1.40,"Y");
+  frame->SetTitleOffset(1.45,"Y");
   frame->SetXTitle(xtit);
   frame->SetYTitle(ytit);
   frame->SetNdivisions(505,"X");
@@ -168,7 +168,11 @@ void plots(){
   gStyle->SetStatH(0.28);
 
   bool withBDT = true;
+  bool phaseSpaceCuts = false;
+  TString suffix = "all";
+  if(phaseSpaceCuts) suffix = "phaseSpaceCut";
   
+
 
   TLatex *myLatex = new TLatex();
   myLatex->SetTextFont(42); myLatex->SetTextColor(1); myLatex->SetTextAlign(12); myLatex->SetNDC(kTRUE); myLatex->SetTextSize(0.045);
@@ -229,8 +233,11 @@ void plots(){
 
   TCut B0Cut = "(abs(sqrt( pow(Jpsi_PE+k_PE+sqrt(p_PX**2+p_PY**2+p_PZ**2+139.57**2),2)-(Jpsi_PX+p_PX+k_PX)**2-(Jpsi_PY+p_PY+k_PY)**2-(Jpsi_PZ+p_PZ+k_PZ)**2)-5280)-Jpsi_M+3097>20 || p_ProbNNp>0.6)";
   cuts[0] = cuts[0] && B0Cut;
-  cuts[0] = cuts[0] && "Jpsi_L0DiMuonDecision_TOS>0";
-  cuts[0] = cuts[0] && "Xc_M>1650&&Xc_M<1850";
+  //cuts[0] = cuts[0] && "Jpsi_L0DiMuonDecision_TOS>0";
+  if(phaseSpaceCuts){  
+    cuts[0] = cuts[0] && "Xc_M>1950&&Xc_M<2250";
+    //cuts[0] = cuts[0] && "sqrt(pow(Jpsi_PE+p_PE,2)-pow(Jpsi_PX+p_PX,2)-pow(Jpsi_PY+p_PY,2)-pow(Jpsi_PZ+p_PZ,2))>4400";
+  }
   
 
   //TString mRangeCut = Form("Xb_M>%4.0f&&Xb_M<%4.0f",mlow[0],mhi[0]);
@@ -281,14 +288,14 @@ void plots(){
   pdf[i]->fitTo(*rdh[i],Hesse(kTRUE),Strategy(1));
   cc[i] = makeRooPlot(pdf[i],rdh[i],mvar[i],i,nsig[i],modes[i],mlow[i],mhi[i],nbins[i]);
   cc[i]->Update();
-  cc[i]->Print("./massPlot.png");
+  cc[i]->Print("./massPlot_"+suffix+".png");
 
   bool do_splot = true;
   
   if(!do_splot) return;
   
   //TTree* treeNew1 = tree[i]->CopyTree(cuts[i]);
-  TString fileName = "/data1/sblusk/Xibc/JpsiX/Lb2JpsipK/data/sWeightedData.root";
+  TString fileName = "/data1/sblusk/Xibc/JpsiX/Lb2JpsipK/data/sWeightedData_"+suffix+".root";
   TFile *fout = new TFile(fileName,"RECREATE");
 
   TTree* treeNew1 = tree[i]->CopyTree(cuts[i]);
@@ -302,6 +309,8 @@ void plots(){
   RooRealVar* Xb_OWNPV_X = new RooRealVar("Xb_OWNPV_X","Xb PV pos",-1.0e10,1.0e10);
   RooRealVar* Xb_OWNPV_Y = new RooRealVar("Xb_OWNPV_Y","Xb PV pos",-1.0e10,1.0e10);
   RooRealVar* Xb_LOKI_DTF_CHI2NDOF = new RooRealVar("Xb_LOKI_DTF_CHI2NDOF","Xb DTF chisq",-1.0e10,1.0e10);
+  RooRealVar* Xb_ENDVERTEX_CHI2 = new RooRealVar("Xb_ENDVERTEX_CHI2","Xb Vtx chisq",-1.0e10,1.0e10);
+  RooRealVar* Xb_ENDVERTEX_NDOF = new RooRealVar("Xb_ENDVERTEX_NDOF","Xb Vtx ndof",-1.0e10,1.0e10);
 
   RooRealVar* Xb_IPCHI2_OWNPV = new RooRealVar("Xb_IPCHI2_OWNPV","Xb IP chisq",-1.0e10,1.0e10);
   RooRealVar* Xb_DIRA_OWNPV = new RooRealVar("Xb_DIRA_OWNPV","Xb DIRA",-1.0e10,1.0e10);
@@ -327,11 +336,26 @@ void plots(){
   //RooRealVar* k_ETA = new RooRealVar("k_ETA","K^{-} pseudorapidity",-1.0e10,1.0e10);
   //RooRealVar* p_ETA = new RooRealVar("p_ETA","p^{+} pseudorapidity",-1.0e10,1.0e10);
 
+  RooRealVar* Jpsi_PX = new RooRealVar("Jpsi_PX","Jpsi PX",-1.0e10,1.0e10);
+  RooRealVar* Jpsi_PY = new RooRealVar("Jpsi_PY","Jpsi PY",-1.0e10,1.0e10);
+  RooRealVar* Jpsi_PZ = new RooRealVar("Jpsi_PZ","Jpsi PZ",-1.0e10,1.0e10);
+  RooRealVar* Jpsi_PE = new RooRealVar("Jpsi_PE","Jpsi PE",-1.0e10,1.0e10);
+  RooRealVar* p_PX = new RooRealVar("p_PX","p^{+} PX",-1.0e10,1.0e10);
+  RooRealVar* p_PY = new RooRealVar("p_PY","p^{+} PY",-1.0e10,1.0e10);
+  RooRealVar* p_PZ = new RooRealVar("p_PZ","p^{+} PZ",-1.0e10,1.0e10);
+  RooRealVar* p_PE = new RooRealVar("p_PE","p^{+} PE",-1.0e10,1.0e10);
+  RooRealVar* k_PX = new RooRealVar("k_PX","K^{-} PX",-1.0e10,1.0e10);
+  RooRealVar* k_PY = new RooRealVar("k_PY","K^{-} PY",-1.0e10,1.0e10);
+  RooRealVar* k_PZ = new RooRealVar("k_PZ","K^{-} PZ",-1.0e10,1.0e10);
+  RooRealVar* k_PE = new RooRealVar("k_PE","K^{-} PE",-1.0e10,1.0e10);
+
   RooRealVar* nTracks = new RooRealVar("nTracks","nTracks",-1.0e10,1.0e10);
   RooRealVar* BDTG = new RooRealVar("BDTG","BDTG",-1.0e10,1.0e10);
 
 
   RooArgSet args;
+  args.add(*Xb_ENDVERTEX_CHI2);
+  args.add(*Xb_ENDVERTEX_NDOF);
   args.add(*mvar[i]);
   args.add(*Xc_M);
   args.add(*Xb_ENDVERTEX_X);
@@ -361,6 +385,19 @@ void plots(){
   args.add(*p_V3ProbNNp);
   args.add(*Xc_TAU);
   args.add(*nTracks);
+  args.add(*p_PX);
+  args.add(*p_PY);
+  args.add(*p_PZ);
+  args.add(*k_PX);
+  args.add(*k_PY);
+  args.add(*k_PZ);
+  args.add(*k_PE);
+  args.add(*p_PE);
+  args.add(*Jpsi_PX);
+  args.add(*Jpsi_PY);
+  args.add(*Jpsi_PZ);
+  args.add(*Jpsi_PE);
+
   if(withBDT) args.add(*BDTG);
 
   //----------------------------------------------
@@ -368,6 +405,7 @@ void plots(){
   //----------------------------------------------
   RooFormulaVar* Rfd = new RooFormulaVar("Rfd","log(Radial Flight Distance)","log(sqrt(pow(@0-@1,2)+pow(@2-@3,2)))",
                                         RooArgList(*Xb_ENDVERTEX_X,*Xb_OWNPV_X,*Xb_ENDVERTEX_Y,*Xb_OWNPV_Y)); // radial flight distance
+  RooFormulaVar* XbVtxChisq = new RooFormulaVar("XbVtxChisq","X_{b} #chi^{2}_{vtx}","log(@0/@1)",RooArgList(*Xb_ENDVERTEX_CHI2,*Xb_ENDVERTEX_NDOF));
   RooFormulaVar* DTFChisq = new RooFormulaVar("DTFChisq","X_{b} #chi^{2}_{DTF}","log(@0)",RooArgList(*Xb_LOKI_DTF_CHI2NDOF));
   RooFormulaVar* XbIPChisq = new RooFormulaVar("XbIPChisq","X_{b} #chi^{2}_{IP}","log(@0)",RooArgList(*Xb_IPCHI2_OWNPV));
   RooFormulaVar* XcIPChisq = new RooFormulaVar("XcIPChisq","X_{c} #chi^{2}_{IP}","log(@0)",RooArgList(*Xc_IPCHI2_OWNPV));
@@ -389,6 +427,10 @@ void plots(){
   RooFormulaVar* pEta = new RooFormulaVar("pEta","p^{+} eta","-log(tan(0.5*@0/@1))",RooArgList(*p_PT,*p_PZ));
   RooFormulaVar* kPT = new RooFormulaVar("kPT","K^{-} pT","log(@0)",RooArgList(*k_PT));
   RooFormulaVar* pPT = new RooFormulaVar("pPT","p^{+} pT","log(@0)",RooArgList(*p_PT));
+  RooFormulaVar* mJpsiP = new RooFormulaVar("mJpsiP","M(J/#psi p)","sqrt(pow(@0+@1,2)-pow(@2+@3,2)-pow(@4+@5,2)-pow(@6+@7,2))",
+                                            RooArgList(*Jpsi_PE,*p_PE,*Jpsi_PX,*p_PX,*Jpsi_PY,*p_PY,*Jpsi_PZ,*p_PZ));
+  RooFormulaVar* mJpsiK = new RooFormulaVar("mJpsiK","M(J/#psi K)","sqrt(pow(@0+@1,2)-pow(@2+@3,2)-pow(@4+@5,2)-pow(@6+@7,2))",
+                                            RooArgList(*Jpsi_PE,*k_PE,*Jpsi_PX,*k_PX,*Jpsi_PY,*k_PY,*Jpsi_PZ,*k_PZ));
 
 
   RooDataSet* data_red = new RooDataSet("data_red","dataset with reduced vars",treeNew1,args);
@@ -405,6 +447,7 @@ void plots(){
   RooRealVar* XcPTVar =  (RooRealVar*) data_red->addColumn(*XcPT);  
   RooRealVar* Xc2JpsiPTVar =  (RooRealVar*) data_red->addColumn(*Xc2JpsiPT);  
   RooRealVar* XcVtxChisqVar =  (RooRealVar*) data_red->addColumn(*XcVtxChisq);  
+  RooRealVar* XbVtxChisqVar =  (RooRealVar*) data_red->addColumn(*XbVtxChisq);  
   RooRealVar* kPVar =  (RooRealVar*) data_red->addColumn(*kP);  
   RooRealVar* pPVar =  (RooRealVar*) data_red->addColumn(*pP);  
   RooRealVar* kProbNNkVar =  (RooRealVar*) data_red->addColumn(*kProbNNk);  
@@ -414,6 +457,8 @@ void plots(){
   RooRealVar* pEtaVar =  (RooRealVar*) data_red->addColumn(*pEta);  
   RooRealVar* kPTVar =  (RooRealVar*) data_red->addColumn(*kPT);  
   RooRealVar* pPTVar =  (RooRealVar*) data_red->addColumn(*pPT);  
+  RooRealVar* mJpsiPVar =  (RooRealVar*) data_red->addColumn(*mJpsiP);  
+  RooRealVar* mJpsiKVar =  (RooRealVar*) data_red->addColumn(*mJpsiK);  
 
   TString wsig = "nsig0_sw";
 
@@ -440,19 +485,20 @@ void plots(){
   // Project out weighted data onto histograms
   //-------------------------------------------
   TH1F* XcMass = dataw_signal->createHistogram("XcMass",*Xc_M,Binning(80,1000,2600)); 
-  TH1F* RfdHist = dataw_signal->createHistogram("RfdHist",*RfdVar,Binning(45,-4,4)); 
+  TH1F* RfdHist = dataw_signal->createHistogram("RfdHist",*RfdVar,Binning(40,-4,4)); 
   TH1F* DTFChisqHist = dataw_signal->createHistogram("DTFChisqHist",*DTFChisqVar,Binning(50,-2.5,2.5)); 
   TH1F* XbIPChisqHist = dataw_signal->createHistogram("XbIPChisqHist",*XbIPChisqVar,Binning(50,-6,4)); 
   TH1F* XcIPChisqHist = dataw_signal->createHistogram("XcIPChisqHist",*XcIPChisqVar,Binning(80,-4,12)); 
   TH1F* JpsiIPChisqHist = dataw_signal->createHistogram("JpsiIPChisqHist",*JpsiIPChisqVar,Binning(80,-6,10)); 
-  TH1F* kIPChisqHist = dataw_signal->createHistogram("kIPChisqHist",*kIPChisqVar,Binning(45,1.5,10.5)); 
-  TH1F* pIPChisqHist = dataw_signal->createHistogram("pIPChisqHist",*pIPChisqVar,Binning(45,1.5,10.5)); 
+  TH1F* kIPChisqHist = dataw_signal->createHistogram("kIPChisqHist",*kIPChisqVar,Binning(50,1.0,11)); 
+  TH1F* pIPChisqHist = dataw_signal->createHistogram("pIPChisqHist",*pIPChisqVar,Binning(50,1.0,11)); 
   TH1F* mupIPChisqHist = dataw_signal->createHistogram("mupIPChisqHist",*mupIPChisqVar,Binning(70,-2,12)); 
   TH1F* mumIPChisqHist = dataw_signal->createHistogram("mumIPChisqHist",*mumIPChisqVar,Binning(70,-2,12)); 
   TH1F* XbPTHist = dataw_signal->createHistogram("XbPTHist",*XbPTVar,Binning(60,5,11)); 
   TH1F* XcPTHist = dataw_signal->createHistogram("XcPTHist",*XcPTVar,Binning(60,5,11)); 
   TH1F* Xc2JpsiPTHist = dataw_signal->createHistogram("Xc2JpsiPTHist",*Xc2JpsiPTVar,Binning(70,-3.5,3.5)); 
   TH1F* XcVtxChisqHist = dataw_signal->createHistogram("XcVtxChisqHist",*XcVtxChisqVar,Binning(90,-6,3)); 
+  TH1F* XbVtxChisqHist = dataw_signal->createHistogram("XbVtxChisqHist",*XbVtxChisqVar,Binning(90,-5,4)); 
   TH1F* kPHist = dataw_signal->createHistogram("kPHist",*kPVar,Binning(60,7,13)); 
   TH1F* pPHist = dataw_signal->createHistogram("pPHist",*pPVar,Binning(60,7,13));
   TH1F* kProbNNkHist = dataw_signal->createHistogram("kProbNNkHist",*kProbNNkVar,Binning(50,0,1)); 
@@ -463,6 +509,8 @@ void plots(){
   TH1F* pEtaHist = dataw_signal->createHistogram("pEtaHist",*pEtaVar,Binning(40,1.5,5.5));
   TH1F* kPTHist = dataw_signal->createHistogram("kPTHist",*kPTVar,Binning(50,5,10)); 
   TH1F* pPTHist = dataw_signal->createHistogram("pPTHist",*pPTVar,Binning(50,5,10));
+  TH1F* mJpsiPHist = dataw_signal->createHistogram("mJpsiPHist",*mJpsiPVar,Binning(60,4000,5200));
+  TH1F* mJpsiKHist = dataw_signal->createHistogram("mJpsiKHist",*mJpsiKVar,Binning(70,3400,4800));
   if(withBDT) TH1F* BDTGHist = dataw_signal->createHistogram("BDTGHist",*BDTG,Binning(100,-1,1)); 
 
 
@@ -480,21 +528,24 @@ void plots(){
   addGraphics(XcPTHist,"X_{c} log(p_{T})");
   addGraphics(Xc2JpsiPTHist,"log( p_{T}^{X_{c}} / p_{T}^{J/#psi} )");
   addGraphics(XcVtxChisqHist,"X_{c} log((#chi^{2}_{vtx})");
+  addGraphics(XbVtxChisqHist,"X_{b} log((#chi^{2}_{vtx})");
   addGraphics(kPHist,"K^{-} log(p)");
   addGraphics(pPHist,"p^{+} log(p)");
   addGraphics(kProbNNkHist,"K^{-} 1-#sqrt{1-ProbNNk}");
   addGraphics(pProbNNpHist,"p^{+} 1-#sqrt{1-ProbNNp}");
-  addGraphics(XcTAUHist,"Decay time of #K{-}#pi^{+}#pi^{-} vertex");
+  addGraphics(XcTAUHist,"Decay time of pK^{-} vertex");
   addGraphics(nTracksHist,"# Tracks");
   addGraphics(kPTHist,"K^{-} log(pT)");
   addGraphics(pPTHist,"p^{+} log(pT)");
   addGraphics(kEtaHist,"K^{-} #eta");
   addGraphics(pEtaHist,"p^{+} #eta");
+  addGraphics(mJpsiPHist,"m(J/#psi p)");
+  addGraphics(mJpsiKHist,"m(J/#psi K)");
   if(withBDT) addGraphics(BDTGHist,"BDTG output");
 
   int ii = 1;
-  TCanvas *cSW = new TCanvas("cSW","sWeight plots",1400,700);
-  cSW->Divide(6,4);
+  TCanvas *cSW = new TCanvas("cSW","sWeight plots",1400,1000);
+  cSW->Divide(7,4);
   cSW->cd(ii++);
   XcMass->Draw();
   cSW->cd(ii++);
@@ -524,6 +575,8 @@ void plots(){
   cSW->cd(ii++);
   XcVtxChisqHist->Draw();
   cSW->cd(ii++);
+  XbVtxChisqHist->Draw();
+  cSW->cd(ii++);
   kPHist->Draw();
   cSW->cd(ii++);
   pPHist->Draw();
@@ -542,6 +595,11 @@ void plots(){
   kPTHist->Draw();
   cSW->cd(ii++);
   kEtaHist->Draw();
+
+  cSW->cd(ii++);
+  mJpsiPHist->Draw();
+  cSW->cd(ii++);
+  mJpsiKHist->Draw();
 
 
   cSW->cd(ii++);

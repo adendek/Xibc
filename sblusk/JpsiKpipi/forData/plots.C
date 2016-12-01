@@ -78,10 +78,10 @@ void addGraphics(TH1F *h, TString Xtitle){
   h->SetMarkerStyle(20);
   h->GetXaxis()->SetTitleOffset(1.0);  
   h->GetYaxis()->SetTitleOffset(1.15);
-  h->GetXaxis()->SetTitleSize(0.045);  
-  h->GetYaxis()->SetTitleSize(0.045);
-  h->GetXaxis()->SetLabelSize(0.035);  
-  h->GetYaxis()->SetLabelSize(0.035);  
+  h->GetXaxis()->SetTitleSize(0.05);  
+  h->GetYaxis()->SetTitleSize(0.05);
+  h->GetXaxis()->SetLabelSize(0.04);  
+  h->GetYaxis()->SetLabelSize(0.04);  
   h->SetNdivisions(404,"X");
   h->SetNdivisions(505,"Y");
   h->SetLineWidth(2);
@@ -135,10 +135,11 @@ TChain* getLum(TString name){
   ch->Add("/data1/sblusk/Xibc/JpsiX/All_2011_MAGDN.root/"+name);
   ch->Add("/data1/sblusk/Xibc/JpsiX/All_2011_MAGUP.root/"+name);
   ch->Add("/data1/sblusk/Xibc/JpsiX/All_2012_MAGDN.root/"+name);
-  //ch->Add("/data1/sblusk/Xibc/JpsiX/All_2012_MAGUP.root/"+name);
+  ch->Add("/data1/sblusk/Xibc/JpsiX/All_2012_MAGUP.root/"+name);
   return ch;      
 
 }
+
 
 
 TChain* getChain(TString name, bool withBDT = false){
@@ -148,12 +149,12 @@ TChain* getChain(TString name, bool withBDT = false){
     ch->Add("/data1/sblusk/Xibc/JpsiX/JpsiKpipi/data/All_2011_MAGDN.kpipi.rs.root/"+name);
     ch->Add("/data1/sblusk/Xibc/JpsiX/JpsiKpipi/data/All_2011_MAGUP.kpipi.rs.root/"+name);
     ch->Add("/data1/sblusk/Xibc/JpsiX/JpsiKpipi/data/All_2012_MAGDN.kpipi.rs.root/"+name);
-    //ch->Add("/data1/sblusk/Xibc/JpsiX/JpsiKpipi/data/All_2012_MAGUP.kpipi.rs.root/"+name);
+    ch->Add("/data1/sblusk/Xibc/JpsiX/JpsiKpipi/data/All_2012_MAGUP.kpipi.rs.root/"+name);
   }else{
     ch->Add("/data1/sblusk/Xibc/JpsiX/JpsiKpipi/data/All_2011_MAGDN.kpipi.rs.X2JpsiKpipi.X2Kpipi.wMVA.test3.root/"+name);
     ch->Add("/data1/sblusk/Xibc/JpsiX/JpsiKpipi/data/All_2011_MAGUP.kpipi.rs.X2JpsiKpipi.X2Kpipi.wMVA.test3.root/"+name);
     ch->Add("/data1/sblusk/Xibc/JpsiX/JpsiKpipi/data/All_2012_MAGDN.kpipi.rs.X2JpsiKpipi.X2Kpipi.wMVA.test3.root/"+name);
-    //ch->Add("/data1/sblusk/Xibc/JpsiX/JpsiKpipi/data/All_2012_MAGUP.kpipi.rs.X2JpsiKpipi.X2Kpipi.wMVA.test3.root/"+name);
+    ch->Add("/data1/sblusk/Xibc/JpsiX/JpsiKpipi/data/All_2012_MAGUP.kpipi.rs.X2JpsiKpipi.X2Kpipi.wMVA.test3.root/"+name);
   }  
 
   
@@ -168,7 +169,12 @@ void plots(){
   gStyle->SetStatH(0.28);
 
   bool withBDT = true;  // pick up tuples with BDT
-  
+  bool phaseSpaceCuts = false;
+  TString suffix = "all";
+  if(phaseSpaceCuts) suffix = "phaseSpaceCut";
+
+  bool do_splot = false;
+
 
   TLatex *myLatex = new TLatex();
   myLatex->SetTextFont(42); myLatex->SetTextColor(1); myLatex->SetTextAlign(12); myLatex->SetNDC(kTRUE); myLatex->SetTextSize(0.045);
@@ -226,7 +232,11 @@ void plots(){
   cuts[0] = "Xb_DIRA_OWNPV>0.99995&&abs(Jpsi_M-3097)<30&&k_V3ProbNNk>0.1&&Xc_ENDVERTEX_CHI2/Xc_ENDVERTEX_NDOF<8&&pi1_V3ProbNNpi>0.01&&pi2_V3ProbNNpi>0.01";
   TString mRangeCut = Form("Xb_LOKI_MASS_massConstr>%4.0f&&Xb_LOKI_MASS_massConstr<%4.0f",mlow[0],mhi[0]);
   cuts[0] = cuts[0] && mRangeCut;
-  cuts[0] = cuts[0] && "Xc_M>1500&&Xc_M<1800";
+  cuts[0] = cuts[0] && "abs(sqrt( pow(Jpsi_PE+pi1_PE+pi2_PE,2)-pow(Jpsi_PX+pi1_PX+pi2_PX,2)-pow(Jpsi_PY+pi1_PY+pi2_PY,2)-pow(Jpsi_PZ+pi1_PZ+pi2_PZ,2) )-Jpsi_M - 590)>20";
+  if(phaseSpaceCuts){
+    cuts[0] = cuts[0] && "Xc_M>1500&&Xc_M<1800";
+    // remove psi'K, just for this comparson, which will be quite different kineamtically than J/psi K pi pi
+  }
   
 
   TCanvas *cc[20];
@@ -270,15 +280,14 @@ void plots(){
   pdf[i]->fitTo(*rdh[i],Hesse(kTRUE),Strategy(1));
   cc[i] = makeRooPlot(pdf[i],rdh[i],mvar[i],i,nsig[i],modes[i],mlow[i],mhi[i],nbins[i]);
   cc[i]->Update();
-  cc[i]->Print("./massPlot.png");
+  cc[i]->Print("./massPlot_"+suffix+".png");
   
   
 
-  bool do_splot = true;
   
   if(!do_splot) return;
   
-  TString fileName = "/data1/sblusk/Xibc/JpsiX/JpsiKpipi/data/sWeightedData.root";
+  TString fileName = "/data1/sblusk/Xibc/JpsiX/JpsiKpipi/data/sWeightedData_"+suffix+".root";
   TFile *fout = new TFile(fileName,"RECREATE");
 
   TTree* treeNew1 = tree[i]->CopyTree(cuts[i]);
@@ -292,6 +301,8 @@ void plots(){
   RooRealVar* Xb_OWNPV_X = new RooRealVar("Xb_OWNPV_X","Xb PV pos",-1.0e10,1.0e10);
   RooRealVar* Xb_OWNPV_Y = new RooRealVar("Xb_OWNPV_Y","Xb PV pos",-1.0e10,1.0e10);
   RooRealVar* Xb_LOKI_DTF_CHI2NDOF = new RooRealVar("Xb_LOKI_DTF_CHI2NDOF","Xb DTF chisq",-1.0e10,1.0e10);
+  RooRealVar* Xb_ENDVERTEX_CHI2 = new RooRealVar("Xb_ENDVERTEX_CHI2","Xb Vtx chisq",-1.0e10,1.0e10);
+  RooRealVar* Xb_ENDVERTEX_NDOF = new RooRealVar("Xb_ENDVERTEX_NDOF","Xb Vtx ndof",-1.0e10,1.0e10);
 
   RooRealVar* Xb_IPCHI2_OWNPV = new RooRealVar("Xb_IPCHI2_OWNPV","Xb IP chisq",-1.0e10,1.0e10);
   RooRealVar* Xb_DIRA_OWNPV = new RooRealVar("Xb_DIRA_OWNPV","Xb DIRA",-1.0e10,1.0e10);
@@ -314,10 +325,27 @@ void plots(){
   RooRealVar* pi1_V3ProbNNpi = new RooRealVar("pi1_V3ProbNNpi","#pi^{+} ProbNNk",-1.0e10,1.0e10);
   RooRealVar* pi2_V3ProbNNpi = new RooRealVar("pi2_V3ProbNNpi","#pi^{-} ProbNNk",-1.0e10,1.0e10);
 
+
+  RooRealVar* k_PX = new RooRealVar("k_PX","K^{-} px",-1.0e10,1.0e10);
+  RooRealVar* k_PY = new RooRealVar("k_PY","K^{-} py",-1.0e10,1.0e10);
+  RooRealVar* k_PZ = new RooRealVar("k_PZ","K^{-} pz",-1.0e10,1.0e10);
+  RooRealVar* k_PE = new RooRealVar("k_PE","K^{-} pE",-1.0e10,1.0e10);
+  RooRealVar* pi1_PX = new RooRealVar("pi1_PX","#pi^{+} px",-1.0e10,1.0e10);
+  RooRealVar* pi1_PY = new RooRealVar("pi1_PY","#pi^{+} py",-1.0e10,1.0e10);
+  RooRealVar* pi1_PZ = new RooRealVar("pi1_PZ","#pi^{+} pz",-1.0e10,1.0e10);
+  RooRealVar* pi1_PE = new RooRealVar("pi1_PE","#pi^{+} pE",-1.0e10,1.0e10);
+  RooRealVar* pi2_PX = new RooRealVar("pi2_PX","#pi^{+} px",-1.0e10,1.0e10);
+  RooRealVar* pi2_PY = new RooRealVar("pi2_PY","#pi^{+} py",-1.0e10,1.0e10);
+  RooRealVar* pi2_PZ = new RooRealVar("pi2_PZ","#pi^{+} pz",-1.0e10,1.0e10);
+  RooRealVar* pi2_PE = new RooRealVar("pi2_PE","#pi^{+} pE",-1.0e10,1.0e10);
+
+
   RooRealVar* nTracks = new RooRealVar("nTracks","nTracks",-1.0e10,1.0e10);
   RooRealVar* BDTG = new RooRealVar("BDTG","BDTG",-1.0e10,1.0e10);
 
   RooArgSet args;
+  args.add(*Xb_ENDVERTEX_CHI2);
+  args.add(*Xb_ENDVERTEX_NDOF);
   args.add(*mvar[i]);
   args.add(*Xc_M);
   args.add(*Xb_ENDVERTEX_X);
@@ -346,6 +374,19 @@ void plots(){
   args.add(*pi2_V3ProbNNpi);
   args.add(*Xc_TAU);
   args.add(*nTracks);
+  args.add(*k_PX);
+  args.add(*k_PY);
+  args.add(*k_PZ);
+  args.add(*k_PE);
+  args.add(*pi1_PX);  
+  args.add(*pi1_PY);  
+  args.add(*pi1_PZ);  
+  args.add(*pi1_PE);  
+  args.add(*pi2_PX);  
+  args.add(*pi2_PY);  
+  args.add(*pi2_PZ);  
+  args.add(*pi2_PE);  
+
   if(withBDT) args.add(*BDTG);
 
   //----------------------------------------------
@@ -353,6 +394,7 @@ void plots(){
   //----------------------------------------------
   RooFormulaVar* Rfd = new RooFormulaVar("Rfd","log(Radial Flight Distance)","log(sqrt(pow(@0-@1,2)+pow(@2-@3,2)))",
                                         RooArgList(*Xb_ENDVERTEX_X,*Xb_OWNPV_X,*Xb_ENDVERTEX_Y,*Xb_OWNPV_Y)); // radial flight distance
+  RooFormulaVar* XbVtxChisq = new RooFormulaVar("XbVtxChisq","X_{b} #chi^{2}_{vtx}","log(@0/@1)",RooArgList(*Xb_ENDVERTEX_CHI2,*Xb_ENDVERTEX_NDOF));
   RooFormulaVar* DTFChisq = new RooFormulaVar("DTFChisq","X_{b} #chi^{2}_{DTF}","log(@0)",RooArgList(*Xb_LOKI_DTF_CHI2NDOF));
   RooFormulaVar* XbIPChisq = new RooFormulaVar("XbIPChisq","X_{b} #chi^{2}_{IP}","log(@0)",RooArgList(*Xb_IPCHI2_OWNPV));
   RooFormulaVar* XcIPChisq = new RooFormulaVar("XcIPChisq","X_{c} #chi^{2}_{IP}","log(@0)",RooArgList(*Xc_IPCHI2_OWNPV));
@@ -373,7 +415,10 @@ void plots(){
   RooFormulaVar* pi1ProbNNpi = new RooFormulaVar("pi1ProbNNpi","#pi^{+} ProbNNpi","1-sqrt(1-@0)",RooArgList(*pi1_V3ProbNNpi));
   RooFormulaVar* pi2ProbNNpi = new RooFormulaVar("pi2ProbNNpi","#pi^{-} ProbNNpi","1-sqrt(1-@0)",RooArgList(*pi2_V3ProbNNpi));
   RooFormulaVar* XcTAU = new RooFormulaVar("XcTAU","X_{c} TAU","1000*(@0)",RooArgList(*Xc_TAU));
-
+  RooFormulaVar* mKpi = new RooFormulaVar("mKpi","M(K^{-}#pi^{+})","sqrt(pow(@0+@1,2)-pow(@2+@3,2)-pow(@4+@5,2)-pow(@6+@7,2))",
+                                            RooArgList(*k_PE,*pi1_PE,*k_PX,*pi1_PX,*k_PY,*pi1_PY,*k_PZ,*pi1_PZ));
+  RooFormulaVar* mpipi = new RooFormulaVar("mpipi","M(K^{-}#pi^{+})","sqrt(pow(@0+@1,2)-pow(@2+@3,2)-pow(@4+@5,2)-pow(@6+@7,2))",
+                                            RooArgList(*pi2_PE,*pi1_PE,*pi2_PX,*pi1_PX,*pi2_PY,*pi1_PY,*pi2_PZ,*pi1_PZ));
 
   RooDataSet* data_red = new RooDataSet("data_red","dataset with reduced vars",treeNew1,args);
   RooRealVar* RfdVar =  (RooRealVar*) data_red->addColumn(*Rfd);  
@@ -389,6 +434,7 @@ void plots(){
   RooRealVar* XbPTVar =  (RooRealVar*) data_red->addColumn(*XbPT);  
   RooRealVar* XcPTVar =  (RooRealVar*) data_red->addColumn(*XcPT);  
   RooRealVar* Xc2JpsiPTVar =  (RooRealVar*) data_red->addColumn(*Xc2JpsiPT);  
+  RooRealVar* XbVtxChisqVar =  (RooRealVar*) data_red->addColumn(*XbVtxChisq);  
   RooRealVar* XcVtxChisqVar =  (RooRealVar*) data_red->addColumn(*XcVtxChisq);  
   RooRealVar* kPVar =  (RooRealVar*) data_red->addColumn(*kP);  
   RooRealVar* pi1PVar =  (RooRealVar*) data_red->addColumn(*pi1P);  
@@ -397,6 +443,8 @@ void plots(){
   RooRealVar* pi1ProbNNpiVar =  (RooRealVar*) data_red->addColumn(*pi1ProbNNpi);  
   RooRealVar* pi2ProbNNpiVar =  (RooRealVar*) data_red->addColumn(*pi2ProbNNpi);  
   RooRealVar* XcTAUVar =  (RooRealVar*) data_red->addColumn(*XcTAU);  
+  RooRealVar* mKpiVar =  (RooRealVar*) data_red->addColumn(*mKpi);  
+  RooRealVar* mpipiVar =  (RooRealVar*) data_red->addColumn(*mpipi);  
 
   TString wsig = "nsig0_sw";
 
@@ -437,6 +485,7 @@ void plots(){
   TH1F* XcPTHist = dataw_signal->createHistogram("XcPTHist",*XcPTVar,Binning(60,5,11)); 
   TH1F* Xc2JpsiPTHist = dataw_signal->createHistogram("Xc2JpsiPTHist",*Xc2JpsiPTVar,Binning(70,-3.5,3.5)); 
   TH1F* XcVtxChisqHist = dataw_signal->createHistogram("XcVtxChisqHist",*XcVtxChisqVar,Binning(80,-4,4)); 
+  TH1F* XbVtxChisqHist = dataw_signal->createHistogram("XbVtxChisqHist",*XbVtxChisqVar,Binning(90,-5,4)); 
   TH1F* kPHist = dataw_signal->createHistogram("kPHist",*kPVar,Binning(60,7,13)); 
   TH1F* pi1PHist = dataw_signal->createHistogram("pi1PHist",*pi1PVar,Binning(60,7,13));
   TH1F* pi2PHist = dataw_signal->createHistogram("pi2PHist",*pi2PVar,Binning(60,7,13)); 
@@ -445,6 +494,8 @@ void plots(){
   TH1F* pi2ProbNNpiHist = dataw_signal->createHistogram("pi2ProbNNpiHist",*pi2ProbNNpiVar,Binning(50,0,1)); 
   TH1F* XcTAUHist = dataw_signal->createHistogram("XcTAUHist",*XcTAUVar,Binning(100,-1,1)); 
   TH1F* nTracksHist = dataw_signal->createHistogram("nTracksHist",*nTracks,Binning(100,0,500)); 
+  TH1F* mKpiHist = dataw_signal->createHistogram("mKpiHist",*mKpiVar,Binning(70,600,2000));
+  TH1F* mpipiHist = dataw_signal->createHistogram("mpipiHist",*mpipiVar,Binning(50,200,1700));
   if(withBDT) TH1F* BDTGHist = dataw_signal->createHistogram("BDTGHist",*BDTG,Binning(100,-1,1)); 
 
   addGraphics(XcMass, "K^{-}#pi^{+}#pi^{-} mass [MeV/#it{c}^{2}]");
@@ -462,21 +513,22 @@ void plots(){
   addGraphics(XcPTHist,"X_{c} log(p_{T})");
   addGraphics(Xc2JpsiPTHist,"log( p_{T}^{X_{c}} / p_{T}^{J/#psi} )");
   addGraphics(XcVtxChisqHist,"X_{c} log((#chi^{2}_{vtx})");
+  addGraphics(XbVtxChisqHist,"X_{b} log((#chi^{2}_{vtx})");
   addGraphics(kPHist,"K^{-} log(p)");
   addGraphics(pi1PHist,"#pi^{+} log(p)");
   addGraphics(pi2PHist,"#pi^{-} log(p)");
   addGraphics(kProbNNkHist,"K^{-} 1-#sqrt{1-ProbNNk}");
   addGraphics(pi1ProbNNpiHist,"#pi^{+} 1-#sqrt{1-ProbNNpi}");
   addGraphics(pi2ProbNNpiHist,"#pi^{-} 1-#sqrt{1-ProbNNpi}");
-  addGraphics(XcTAUHist,"Decay time of #K{-}#pi^{+}#pi^{-} vertex");
+  addGraphics(XcTAUHist,"Decay time of K^{-}#pi^{+}#pi^{-} vertex");
   addGraphics(nTracksHist,"# Tracks");
+  addGraphics(mKpiHist,"m(K^{-}#pi^{+})");
+  addGraphics(mpipiHist,"m(#pi^{-}#pi^{+})");
   if(withBDT) addGraphics(BDTGHist,"BDTG output");
 
   int ii = 1;
   TCanvas *cSW = new TCanvas("cSW","sWeight plots",1800,1000);
-  cSW->Divide(6,4);
-  cSW->cd(ii++);
-  XcMass->Draw();
+  cSW->Divide(6,5);
   cSW->cd(ii++);
   RfdHist->Draw();
   cSW->cd(ii++);
@@ -506,6 +558,8 @@ void plots(){
   cSW->cd(ii++);
   XcVtxChisqHist->Draw();
   cSW->cd(ii++);
+  XbVtxChisqHist->Draw();
+  cSW->cd(ii++);
   kPHist->Draw();
   cSW->cd(ii++);
   pi1PHist->Draw();
@@ -519,6 +573,12 @@ void plots(){
   pi2ProbNNpiHist->Draw();
   cSW->cd(ii++);
   XcTAUHist->Draw();
+  cSW->cd(ii++);
+  XcMass->Draw();
+  cSW->cd(ii++);
+  mKpiHist->Draw();
+  cSW->cd(ii++);
+  mpipiHist->Draw();
 
   cSW->cd(ii++);
   nTracksHist->Draw();
