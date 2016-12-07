@@ -10,11 +10,13 @@ from Configurables import MCTupleToolReconstructed, MCReconstructed
 from Configurables import DecayTreeTuple
 
 ####################### run setting 
-simulation = True
-year = "2012"
-polarity = -1
+doTest = False
+if doTest:
+    simulation = True
+    year = "2012"
+    polarity = -1
 #################################
-
+    
 TrackCut = "(TRCHI2DOF < 4.0) & (MIPCHI2DV(PRIMARY)>2) & (TRGHOSTPROB < 0.4) & (PT > 200*MeV) & (ISLONG)"
 DaughtCutPi = TrackCut + " &  (PROBNNpi>0.01)"
 DaughtCutKa = TrackCut + " &  (PROBNNk>0.05)"
@@ -34,10 +36,10 @@ LambdaLL = DataOnDemand(Location = "Phys/StdLooseLambdaLL/Particles")
 
 rootInTes = '/Event/Bhadron'
 locationXb2LcKpi   = "Phys/X2LcKPiOSLc2PKPiBeauty2CharmLine/Particles"
-locationXb2LcKpi_ws   = "Phys/X2LcKPiSSLc2PKPiBeauty2CharmLine/Particles"
+locationXb2LcKpi_ws   = "Phys/X2LcPiKOSLc2PKPiBeauty2CharmLine/Particles"
 if simulation:
     locationXb2LcKpi = "/Event/AllStreams/Phys/X2LcKPiOSLc2PKPiBeauty2CharmLine/Particles"
-    locationXb2LcKpi_ws = "/Event/AllStreams/Phys/X2LcKPiSSLc2PKPiBeauty2CharmLine/Particles"
+    locationXb2LcKpi_ws = "/Event/AllStreams/Phys/X2LcPiKOSLc2PKPiBeauty2CharmLine/Particles"
 Xb2LcKpi = AutomaticData(Location = locationXb2LcKpi)
 Xb2LcKpi_ws = AutomaticData(Location = locationXb2LcKpi_ws)
 
@@ -81,10 +83,10 @@ from Configurables import CondDB
 # Add a filter on the Stripping Lines
 from PhysConf.Filters import LoKi_Filters
 
-fltrs = LoKi_Filters(STRIP_Code=" HLT_PASS_RE('StrippingX2LcKPiOSLc2PKPiBeauty2CharmLine Decision') ")
+fltrs = LoKi_Filters(STRIP_Code=" HLT_PASS_RE('StrippingX2LcKPiOSLc2PKPiBeauty2CharmLineDecision') ")
 fltrSeq = fltrs.sequence('MyFilters')
 
-fltrs_ws = LoKi_Filters(STRIP_Code=" HLT_PASS_RE('StrippingX2LcKPiSSLc2PKPiBeauty2CharmLineDecision') ")
+fltrs_ws = LoKi_Filters(STRIP_Code=" HLT_PASS_RE('StrippingX2LcPiKOSLc2PKPiBeauty2CharmLineDecision') ")
 fltrSeq_ws = fltrs.sequence('MyFilters_ws')
 
 from Configurables import LoKi__HDRFilter   as StripFilter
@@ -107,18 +109,18 @@ if simulation:
 # Gaudi sequences
 
 gseqMyXb0 = GaudiSequencer("MyGaudiSeqMyXb0")
-if simulation == False:
-    gseqMyXb0.Members += [fltrSeq]
+#if simulation == False:
+#    gseqMyXb0.Members += [fltrSeq]
 gseqMyXb0.Members += [seqMyX2LcK]
 gseqMyXb0.Members += [tupleMyXb0]
 
 wsgseqMyXb0 = GaudiSequencer("MyGaudiSeqMyXb0_ws")
-if simulation == False:
-    gseqMyXb0.Members += [fltrSeq_ws]
+#if simulation == False:
+#    wsgseqMyXb0.Members += [fltrSeq_ws]
 wsgseqMyXb0.Members += [seqMyX2LcK_ws]
 wsgseqMyXb0.Members += [tupleMyXb0_ws]
 
-DaVinci().appendToMainSequence( [gseqMyXb0] )
+#DaVinci().appendToMainSequence( [gseqMyXb0] )
 DaVinci().appendToMainSequence([gseqMyXb0, wsgseqMyXb0])
 #if simulation == False:
 #    DaVinci().appendToMainSequence([wsgseqMyXb0])                                                                                                                                                                                                                  
@@ -160,9 +162,10 @@ else:
     DaVinci().RootInTES = rootInTes
 
 
-
-from GaudiConf import IOHelper
-IOHelper().inputFiles(['/afs/cern.ch/work/s/sblusk//public/Xibc/LcKpi/00038996_00000020_2.AllStreams.dst'], clear=True)  #Xib -> Lc+ k- pi- signal MC
+if doTest:
+    from GaudiConf import IOHelper
+    #IOHelper().inputFiles(['/afs/cern.ch/work/s/sblusk//public/Xibc/LcKpi/00038996_00000020_2.AllStreams.dst'],clear=True)  #Xib -> Lc+ k+ pi- signal MC
+    IOHelper().inputFiles(['/afs/cern.ch/work/s/sblusk//public/Xibc/LcKpi/00053263_00000001_2.AllStreams.dst'],clear=True)  #Xibc -> Lc+ k- pi+ signal MC
 
 
 

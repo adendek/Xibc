@@ -10,7 +10,7 @@ CPUTime     = 60*60*15
 jobName     = "D11"
 outputfile  = "tuple.root"
 summaryfile = "summary.xml"
-inputdir = '/afs/cern.ch/user/a/adendek/Xibc/Xibc/scripts/Xb2LbK/'
+inputdir = '/afs/cern.ch/user/s/sblusk/XibcGit/Xibc/scripts/Xb2LcKpi/'
 backend=Dirac()
 backend.settings['CPUTime'] = CPUTime
 splitter = SplitByFiles(filesPerJob=filesPerJob, maxFiles = maxFiles)
@@ -43,7 +43,7 @@ def getMCDataSet(pol):
     #DecID = "15144103"   # Lb-->Jpsi Lambda, Lambda-> p pi   sim08a, Digi13
     #DecID = "16145133"   # Xib- ->Jpsi Xi-, Xi- -> Lambda pi, Lambda-> p pi   sim08a, Digi13
 
-    DecID = "16264061"   # [ Xi_bc0 -> (Lambda_c+ -> p K- pi+) K-  ]cc
+    DecID = "16265064"   # [ Xi_bc0 -> (Lambda_c+ -> p K- pi+) K- pi+ ]cc
 
     sim = "Sim09a"
     vStrip = "21"
@@ -133,11 +133,12 @@ else:
 #j.outputfiles = [SandboxFile(namePattern='*.root')]
 j.outputfiles = [DiracFile('tuple.root')]
 
-if simulation == False:
-    j.parallel_submit = True
+#if simulation == False:
+#    j.parallel_submit = True
 
 j.do_auto_resubmit = True
 
 j.splitter.bulksubmit = False
-j.submit()
+#j.submit()
 
+queues.add(j.submit)

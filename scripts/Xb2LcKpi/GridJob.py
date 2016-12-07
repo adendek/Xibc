@@ -10,7 +10,7 @@ CPUTime     = 60*60*15
 jobName     = "D11"
 outputfile  = "tuple.root"
 summaryfile = "summary.xml"
-inputdir = '/afs/cern.ch/user/a/adendek/Xibc/Xibc/scripts/Xb2LbK/'
+inputdir = '/afs/cern.ch/user/s/sblusk/XibcGit/Xibc/scripts/Xb2LcKpi/'
 backend=Dirac()
 backend.settings['CPUTime'] = CPUTime
 splitter = SplitByFiles(filesPerJob=filesPerJob, maxFiles = maxFiles)
@@ -43,7 +43,7 @@ def getMCDataSet(pol):
     #DecID = "15144103"   # Lb-->Jpsi Lambda, Lambda-> p pi   sim08a, Digi13
     #DecID = "16145133"   # Xib- ->Jpsi Xi-, Xi- -> Lambda pi, Lambda-> p pi   sim08a, Digi13
 
-    DecID = "16264061"   # [ Xi_bc0 -> (Lambda_c+ -> p K- pi+) K-  ]cc
+    DecID = "16265064"   # [ Xi_bc0 -> (Lambda_c+ -> p K- pi+) K- pi+ ]cc
 
     sim = "Sim09a"
     vStrip = "21"
@@ -70,7 +70,7 @@ def getDataSet(year,pol):
     stripVer2012 = "21"     #re-strip #3 stripping (2012)
     stripVer2011 = "21r1"     #re-strip #2 (2011)
 
-    stream = 'BHADRONCOMPLETEEVENT.DST'
+    stream = 'BHADRON.MDST'
 
     #--- 2012 data (reco 14)
     data2012MagDown = 'LHCb/Collision12/Beam4000GeV-VeloClosed-MagDown/Real Data/Reco14/Stripping'+stripVer2012+'/90000000/'+stream

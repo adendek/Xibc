@@ -77,15 +77,15 @@ tuple.ReFitPVs = True
 
 tuplews = tuple.clone("MyXb0_ws")
 tuplews.Inputs = ["/Event/BhadronCompleteEvent/Phys/Lb2LcKWSLc2PKPiBeauty2CharmLine/Particles"]
-tuplews.Decay = '[ B- -> ^(Lambda_c+ -> ^p+ ^K- ^pi+) ^K- ^pi-]CC'
+tuplews.Decay = '[ B+ -> ^(Lambda_c+ -> ^p+ ^K- ^pi+) ^K+ ^pi-]CC'
 tuplews.Branches = {
-    "Xb"   :   "[ B- -> (Lambda_c+ -> p+ K- pi+) K- pi-]CC",
-    "Xc"   :   "[ B- -> ^(Lambda_c+ -> p+ K- pi+) K- pi-]CC",
-    "p"      : "[ B- -> (Lambda_c+ -> ^p+ K- pi+) K- pi-]CC",
-    "k"      : "[ B- -> (Lambda_c+ -> p+ ^K- pi+) K- pi-]CC",
-    "pi"     : "[ B- -> (Lambda_c+ -> p+ K- ^pi+) K- pi-]CC",
-    "K"   :    "[ B- -> (Lambda_c+ -> p+ K- pi+) ^K- pi-]CC",
-    "PI"   :   "[ B- -> (Lambda_c+ -> p+ K- pi+) K- ^pi-]CC"
+    "Xb"   :   "[ B+ -> (Lambda_c+ -> p+ K- pi+) K+ pi-]CC",
+    "Xc"   :   "[ B+ -> ^(Lambda_c+ -> p+ K- pi+) K+ pi-]CC",
+    "p"      : "[ B+ -> (Lambda_c+ -> ^p+ K- pi+) K+ pi-]CC",
+    "k"      : "[ B+ -> (Lambda_c+ -> p+ ^K- pi+) K+ pi-]CC",
+    "pi"     : "[ B+ -> (Lambda_c+ -> p+ K- ^pi+) K+ pi-]CC",
+    "K"   :    "[ B+ -> (Lambda_c+ -> p+ K- pi+) ^K+ pi-]CC",
+    "PI"   :   "[ B+ -> (Lambda_c+ -> p+ K- pi+) K+ ^pi-]CC"
     }
 
 
